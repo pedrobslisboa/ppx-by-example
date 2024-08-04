@@ -1,0 +1,6 @@
+(executable
+ (name building_ast)
+ (public_name building_ast_demo)
+ (libraries ppxlib ppxlib.astlib)
+ (preprocess
+  (pps ppxlib.metaquot)))

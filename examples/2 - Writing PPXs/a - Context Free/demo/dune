@@ -1,0 +1,5 @@
+(executable
+ (name context_free_demo)
+ (public_name context_free_demo)
+ (preprocess
+  (pps context_free)))
