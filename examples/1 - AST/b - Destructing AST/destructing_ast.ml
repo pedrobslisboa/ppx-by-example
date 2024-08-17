@@ -2,8 +2,7 @@ open Ppxlib
 
 let loc = Location.none
 
-let one ~loc =
-  Ast_builder.Default.pexp_constant ~loc (Parsetree.Pconst_integer ("0", None))
+let one ~loc = [%expr 1]
 
 let structure_item loc =
   let expr = one ~loc in
@@ -29,9 +28,8 @@ let test_match_pstr_eval () =
   let structure_item = structure_item loc in
   let structure = [ structure_item ] in
   match match_int_payload ~loc (PStr structure) with
-  | Ok value ->
-      Printf.printf "\nMatched integer using normal pattern matching: %s"
-        (value |> string_of_int)
+  | Ok _ ->
+      Printf.printf "\nMatched 1 using Ast_pattern"
   | Error _ -> Printf.printf "\nDid not match pstr_eval"
 
 let _ = test_match_pstr_eval ()

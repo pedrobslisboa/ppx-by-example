@@ -19,12 +19,12 @@
 
 (package
  (name ppx-studies)
+ (synopsis "This project contains examples to help on understanding what are and how to write PPXs in OCaml.")
  (allow_empty)
  (depends
   (ocaml
    (>= 5.0.0))
-  melange
   ocaml-lsp-server
   ocamlformat
-  ppxlib
-  (ocaml-lsp-server :with-test)))
+  ppx_deriving
+  ppxlib))
