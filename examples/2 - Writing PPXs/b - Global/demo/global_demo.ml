@@ -1,3 +1,9 @@
+let demo_name = "Global Demo"
+let _ = demo_name
+
+(* Uncomment the code bellow to see the lint error *)
+(* let name = "John Doe" *)
+
 (* module enum *)
 let _ = print_endline "\n# Enum"
 

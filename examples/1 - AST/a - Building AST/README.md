@@ -44,9 +44,9 @@ There are several methods to build an AST. We’ll discuss three approaches:
 - **Building ASTs with `AST_builder`**
 - **Using Metaquot for AST Construction**
 
-## Building ASTs with Pure OCaml
+## Building ASTs with Low-Level Builders
 
-The most fundamental way to build an AST is to manually construct it using OCaml’s native data structures.
+The most fundamental way to build an AST is to manually construct it using Low-Level Builders data structures.
 
 ### Example: Building a Simple Integer AST Manually
 
@@ -94,7 +94,7 @@ For even more simplicity, use `eint`:
 let two ~loc = Ast_builder.Default.eint ~loc 2
 ```
 
-> **💡 Tip**    
+> **:bulb: Tip**    
 > `eint` is an abbreviation for expression (`e`) integer (`int`).
 
 ## Using Metaquot for AST Construction
@@ -111,7 +111,7 @@ With Metaquot, you can construct an integer AST like this:
 let three ~loc = [%expr 3]
 ```
 
-> **💡 Tip**    
+> **:bulb: Tip**    
 > Metaquot is highly readable and intuitive but is static. For dynamic values, use Anti-Quotations.
 
 ### Using Anti-Quotations in Metaquot

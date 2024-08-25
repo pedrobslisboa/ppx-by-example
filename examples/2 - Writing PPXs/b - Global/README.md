@@ -10,13 +10,16 @@ make demo-global
 ### Table of Contents
 
 - [Description](#description)
-- [Implementing Global Transformations](#implementing-global-transformations)
-  - [Example 1: Extending a Module with the `[@enum]` Attribute](#example-1-extending-a-module-with-the-enum-attribute)
-  - [Example 2: Extending a Module with the `[@enum2 ~opt]` Attribute](#example-2-extending-a-module-with-the-enum2-opt-attribute)
+- [Types of Global Transformations](#types-of-global-transformations)
 - [Using `Ast_traverse`](#using-ast_traverse)
-- [Linting with PPX](#linting-with-ppx)
-  - [Example 1: Linting with `[@enum]`](#example-1-linting-with-enum)
-  - [Example 2: Linting with `[@enum2]`](#example-2-linting-with-enum2)
+  - [How It Works](#how-it-works)
+  - [Key Points](#key-points)
+- [Lint](#lint)
+  - [Example 1: Linting Variable Names to Have the Prefix `demo_`](#example-1-linting-variable-names-to-have-the-prefix-demo_)
+- [Preprocess](#preprocess)
+  - [Example 1: Extending a Module with the `[@enum]` Attribute](#example-1-extending-a-module-with-the-enum-attribute)
+- [Global Transformation](#global-transformation)
+  - [Example 1: Extending a Module with the `[@enum2 opt]` Attribute](#example-1-extending-a-module-with-the-enum2-opt-attribute)
 - [Conclusion](#conclusion)
 
 ## Description
@@ -28,15 +31,110 @@ As we saw in the [Writing PPXs section](../README.md), global transformations ar
 - Lint
 - Preprocess
 - Instrumentation - Before
-- Global Trasformation
+- Global Transformation
 - Instrumentation - After
 
-## Implementing Global Transformations
+For now, in this section, we are going to focus on **Lint**, **Preprocess**, and **Global Transformation** because they are the most common phases to register a global transformation.
+In the future, we plan to add **Instrumentation - Before** and **Instrumentation - After**.
 
-### Example 1: Extending a Module with the `[@enum]` Attribute 
-:link: [Sample Code](./context_free.ml#L5-L17)
+## Using `Ast_traverse`
 
-Let's say we want to extend a module with automatically generated `to_string` and `from_string` functions based on a variant type using the `[@enum]` attribute.
+To help with global transformations, we'll use the `Ast_traverse` module from PPXLib in all examples. `Ast_traverse` makes it easier to walk through and change the AST in a structured way.
+
+### How It Works:
+
+`Ast_traverse` is helpful for navigating and modifying complex structures like the AST.
+
+Here are the main types of traversals you can do with `Ast_traverse`:
+
+- **Iterators**: Go through the AST and perform actions on each node, often for side effects like checking for specific patterns or enforcing rules.
+
+- **Maps**: Traverse the AST and replace nodes where needed. This is useful for making changes to the AST and returning a modified version.
+
+- **Folds**: Traverse the AST while keeping track of some data (an accumulator) that gets updated at each node, such as counting nodes or gathering specific information.
+
+- **Lifts**: Transform an AST node into a different type by working from the bottom up, often used to convert AST structures into other forms.
+
+### Key Points:
+
+- **Inherit from `Ast_traverse` classes**: Depending on your needs, you can inherit from classes like `Ast_traverse.iter` for iterators or `Ast_traverse.map` for maps. This gives you a base to start from.
+
+- **Override specific methods**: Customize your traversal by overriding methods that handle specific AST nodes, like `module_binding` or `structure_item`.
+
+- **Register with `Driver.register_transformation`**: After defining your traversal, register it with the PPX driver. This ensures your transformations are applied during compilation.
+
+Using `Ast_traverse` simplifies global transformations, letting you efficiently modify large sections of code or entire modules without needing to handle all the details manually.
+
+## Lint
+
+Linting is a form of static analysis that checks code for potential errors, bugs, or style issues. PPXLib provides a mechanism to implement linting rules using PPX. It takes as input the whole AST and outputs a list of "lint" errors. For linting, we are going to use the `Ast_traverse.fold` as we want to provide a list of errors.
+
+### Example 1: Linting Variable Names to Have the Prefix `demo_`
+
+[:link: Sample Code](./context_free.ml#L1-L4)
+
+Let's create a linting rule that ensures that all `value_binding`s have the prefix `demo_`.
+
+#### Consider the following example:
+
+```ocaml
+(* This will raise a lint error *)
+let name = "John Doe"
+
+(* This will not raise a lint error *)
+let demo_name = "John Doe"
+```
+
+#### Steps to Implement This Transformation:
+
+- **Understand the AST Structure:**
+  We want to match all `value_binding`s. To do this, it’s helpful to see the structure of the AST for a `value_binding`. For that, you can use [AST Explorer](https://astexplorer.net/#/gist/d479d32127d6fcb418622ee84b9aa3b2/27d0a140f268bae1a32c8882d55c0b26c7e03fe9). If you’re not familiar with reading ASTs, check out the [AST section](../../1%20-%20AST/README.md).
+
+- **Ast_traverse.fold:**
+  We are going to use `Ast_traverse.fold` to provide a list of errors. Since we want to match all `value_binding` names, we’ll override the `value_binding` method in the AST traversal object, and for each `value_binding`, we’ll check if the variable name starts with `demo_` using `value_binding.pvb_pat.ppat_desc`.
+
+  ```ocaml
+  let traverse =
+  object
+    (* Inherit from Ast_traverse.fold with the Lint_error.t list as the accumulator *)
+    inherit [Driver.Lint_error.t list] Ast_traverse.fold
+
+    (* Override the value_binding method to lint the variable name *)
+    (* the value_binding method is called for each value_binding in the AST *)
+    method! value_binding vb acc =
+      let loc = vb.pvb_loc in
+        match ast with
+        (* Match all pattern variables and get their names *)
+        | Ppat_var { txt = name; _ } ->
+            (* Check if the variable name starts with demo_ *)
+            if String.starts_with name ~prefix:"demo_" then acc
+            else
+              (* If not, add a lint error to the accumulator *)
+              Driver.Lint_error.of_string loc
+                "Oops, variable names must start with demo_"
+              :: acc
+        | _ -> acc
+  end
+  ```
+
+- **Register the Lint Rule with the PPX Driver:**
+  Register with `~lint_impl`.
+
+  ```ocaml
+  let _ = Driver.register_transformation "lint" ~lint_impl:traverse#structure
+  ```
+
+## Preprocess
+
+Preprocessing is the first phase that alters the AST.
+
+:warning: **Warning**: You should only register a transformation in this phase if it is really necessary. You can use the Global Transformation phase instead.
+
+### Example 1: Extending a Module with the `[@enum]` Attribute
+
+[:link: Sample Code](./context_free.ml#L9-L18)
+
+Let’s say we want to extend a module with automatically generated `to_string` and `from_string` functions based on a variant type using the `[@enum]` attribute.
 
 #### Consider the following example:
 
@@ -59,30 +157,70 @@ module GameEnum = struct
 end *)
 ```
 
-#### Steps to Implement This Transformation:
+#### Steps to Implement This Global Transformation:
 
-- **Declare the Enum Tag and Function:**  
-  Define a function that generates the `to_string` and `from_string` functions. This function's structure is similar to what we covered in the [Context-Free Transformations](../b%20-%20Context-Free/README.md) section. The only difference is that this function operates at the module level.
+- **Understand the AST Structure:**
+  We want to match a `module_expr` with the `[@enum]` attribute and generate `to_string` and `from_string` functions based on the variant type within the module.
 
-- **Override the `module_binding` Method:**  
-  Use the `module_binding` method in an `Ast_traverse` object to scan the AST for module bindings with the `[@enum]` attribute and append the generated functions to the module structure. This expands on the principles covered in context-free transformations by applying them globally.
+- **Ast_traverse.map:**
+  We are going to use `Ast_traverse.map` because we want to modify the AST. We’ll override the `module_expr` method in the AST traversal object to append the generated `to_string` and `from_string` functions to the module's structure.
 
-- **Register the Transformation:**  
-  Finally, register the transformation with the PPX driver to automate its application during compilation.
+  ```ocaml
+  let traverse =
+    object
+      inherit Ast_traverse.map as super
 
-### Example 2: Extending a Module with the `[@enum2 ~opt]` Attribute 
-:link: [Sample Code](./context_free.ml#L126-L216)
+      (* Override the module_expr method to generate to_string and from_string functions *)
+      method! module_expr mod_exp =
+        (* Call the super method to traverse the module expression *)
+        let mod_exp = super#module_expr mod_exp in
+        (* Check if the module expression has the [@enum] attribute *)
+        match mod_exp.pmod_attributes with
+        | [ { attr_name = { txt = "enum"; _ }; _ } ]
+          -> (
+            (* match the module expression structure to get the type name and variants *)
+            match mod_exp.pmod_desc with
+            | Pmod_structure
+                ([ { pstr_desc = Pstr_type (name, variants); _ } ] as str) ->
+                (* We are not going to show the enum function because we already covered it in the previous Context-free section *)
+                let type_ =
+                  enum ~loc:mod_exp.pmod_loc (name, variants) ()
+                in
+                (* Append the generated functions to the module structure *)
+                Ast_builder.Default.pmod_structure ~loc:mod_exp.pmod_loc (str @ type_)
+            | _ -> mod_exp)
+        | _ -> mod_exp
+    end
+  ```
 
-Now, let's extend the previous example to include an `opt` argument in the `[@enum2]` attribute. This argument modifies the behavior of the `from_string` function to return an `option` type instead of raising an exception.
+- **Register the Deriver with the PPX Driver:**
+
+  ```ocaml
+  let _ = Driver.register_transformation "enum" ~impl:traverse#structure
+  ```
+
+## Global Transformation
+
+The Global Transformation phase can be confusing because everything we’ve discussed in this section falls under global transformations. However, the Global Transformation phase specifically refers to the phase that happens after the Context-free phase.
+
+This is the most common phase to register a global transformation that alters the AST.
+
+The API of the global transformation is the same as the preprocess, and to make it simple, we are going to use the same example as the preprocess, but with payload.
+
+### Example 1: Extending a Module with the `[@enum2 opt]` Attribute
+
+[:link: Sample Code](./context_free.ml#L27-L47)
+
+Let’s extend the previous example to add support for an `opt` argument that modifies the behavior of the `from_string` function to return an `option` type instead of raising an exception.
 
 #### Consider the following example:
 
 ```ocaml
-module GameEnum = struct
+module GameEnum2 = struct
   type t = Rock | Paper | Scissors
-end [@enum2 ~opt]
+end [@enum2 opt]
 (* Output:
-module GameEnum = struct
+module GameEnum2 = struct
   type t = Rock | Paper | Scissors
   let to_string = function
     | Rock -> "Rock"
@@ -96,70 +234,44 @@ module GameEnum = struct
 end *)
 ```
 
-#### Steps to Implement This Transformation:
+#### Steps to Implement This Global Transformation:
 
-- **Modify the Enum Function:**  
-  Extend the function to include an optional `opt` argument that alters the behavior of the `from_string` function. This follows the same logic as the [Enum Deriver with args](../b%20-%20Context-Free/README.md#example-2-enum-deriver-with-args) example from the Context-Free section.
+- **This example is an extension of the previous one.**
+  The only thing that changes is the `from_string` function, which now returns an `option` type instead of raising an exception. To do this, we need to get the attribute's payload.
 
-- **Update the `module_binding` Method:**  
-  Enhance the `module_binding` method to handle the `[@enum2]` attribute and check for the `opt` argument, applying the appropriate changes to the `from_string` function.
+  ```ocaml
+  (* Check if the module expression has the @enum2 attribute and get the attribute's payload *)
+  | [ { attr_name = { txt = "enum2"; _ }; attr_payload = payload; _ } ]
+          -> (
+            (* match the module expression structure to get the type name and variants *)
+            let opt =
+              match payload with PStr [%str opt] -> true | _ -> false
+            in
+            match mod_exp.pmod_desc with
+            | Pmod_structure
+                ([ { pstr_desc = Pstr_type (name, variants); _ } ] as str) ->
+                (* We are not going to show the enum function because we already covered it in the previous Context-free section *)
+                let type_ =
+                  enum ~loc:mod_exp.pmod_loc ~opt (name, variants) ()
+                in
+                Ast_builder.Default.pmod_structure ~loc:mod_exp.pmod_loc (str @ type_)
+            | _ -> mod_exp)
+        | _ -> mod_exp
+  ```
 
-- **Register the Transformation:**  
-  As before, register the transformation with the PPX driver to ensure it is applied automatically during compilation.
+- **Register the Deriver with the PPX Driver:**
+  The difference here compared to the preprocess is that we are going to use the `~impl` instead of `~preprocess_impl`.
 
-## Using `Ast_traverse`
-
-`Ast_traverse` is a powerful tool in PPXLib that allows you to traverse and transform the AST in a structured way. It's particularly useful for global transformations where you need to modify entire modules or large sections of code.
-
-### How It Works:
-
-`Ast_traverse` provides an object-oriented API for recursively visiting and transforming AST nodes. By inheriting from the `Ast_traverse.map` class, you can override methods corresponding to specific AST nodes (e.g., `module_binding`, `structure_item`, etc.) to implement custom transformations.
-
-In the examples above, the `module_binding` method is overridden to identify modules with the `[@enum]` or `[@enum2]` attribute. The transformation is then applied to these modules, generating the necessary `to_string` and `from_string` functions and appending them to the module structure.
-
-### Key Points:
-
-- **Inherit from `Ast_traverse.map`:**  
-  This allows you to create an object that can traverse and modify the AST.
-
-- **Override specific methods:**  
-  By overriding methods like `module_binding`, you can target specific parts of the AST for transformation.
-
-- **Combine with `Driver.register_transformation`:**  
-  After defining your transformation logic, use `Driver.register_transformation` to ensure it is applied during the compilation process.
-
-## Linting with PPX
-
-PPX allows you to implement linting rules to enforce coding standards or detect potential issues in your code. Below, we outline how to create linting rules for the `[@enum]` and `[@enum2]` attributes, building on concepts from the context-free linting examples.
-
-### Example 1: Linting with `[@enum]` 
-:link: [Sample Code](./context_free.ml#L126-L216)
-
-This linting rule ensures that the `[@enum]` attribute is correctly used on a simple module structure containing a single variant type.
-
-#### Steps to Implement This Lint:
-
-- **Define the Linting Rule:**  
-  Create a linting rule that inherits from `Ast_traverse.fold` to traverse the module structure. This rule checks whether the module adheres to the expected pattern for using the `[@enum]` attribute.
-
-- **Register the Lint:**  
-  Register the lint with the PPX driver, enabling it to run during the compilation process.
-
-### Example 2: Linting with `[@enum2]` 
-:link: [Sample Code](./context_free.ml#L126-L216)
-
-This linting rule extends the previous example to check for the correct usage of the `opt` argument in the `[@enum2]` attribute.
-
-#### Steps to Implement This Lint:
-
-- **Extend the Linting Rule:**  
-  Add logic to the linting rule to verify that the `opt` argument is present and that the `from_string` function returns an `option` type when `opt` is specified.
-
-- **Register the Lint:**  
-  As with the other examples, register the lint with the PPX driver to ensure it is applied automatically.
+  ```ocaml
+  let _ = Driver.register_transformation "enum2" ~impl:traverse#structure
+  ```
 
 ## Conclusion
 
-Global transformations are a powerful tool for automating repetitive tasks and ensuring consistency across your codebase. By extending the concepts of context-free transformations to entire modules and leveraging `Ast_traverse`, you can significantly reduce boilerplate and maintain a clean, maintainable code structure. Additionally, implementing linting rules ensures that your transformations are used correctly and consistently throughout your project.
+Global transformations in OCaml using PPXLib allow you to automate repetitive tasks and enforce coding patterns across your entire codebase. By using phases like **Preprocess**, **Global Transformation**, and **Lint**, you can reduce boilerplate code, maintain consistency, and catch potential issues early.
 
-### [On the next section, we will explore advanced use cases of global transformations.](../c%20-%20Advanced%20Global%20Transformations/README.md)
+We looked at how `Ast_traverse` helps in navigating and modifying the AST for tasks like generating `to_string` and `from_string` functions or implementing linting rules. The examples showed how to extend modules with attributes like `[@enum]` and `[@enum2 opt]`.
+
+Understanding these concepts and using the right transformation phase ensures your code is cleaner, more consistent, and easier to maintain.
+
+### [In the next section, we will explore advanced use cases of global transformations.](../c%20-%20Advanced%20Global%20Transformations/README.md)

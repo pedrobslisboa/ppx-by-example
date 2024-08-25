@@ -61,91 +61,77 @@ let enum ~loc ?(opt = false) ast () =
       in
       [ from_string_expr; to_string_expr ]
   | _ ->
-      [%str
-        [%ocaml.error "Ops, enum2 must be a type with variant without args"]]
+      [%str [%ocaml.error "Ops, enum must be a type with variant without args"]]
 
-let traverse =
-  object (_ : Ast_traverse.map)
-    inherit Ast_traverse.map as super
+module Lint = struct
+  let traverse =
+    object
+      inherit [Driver.Lint_error.t list] Ast_traverse.fold
 
-    method! module_binding mb =
-      let mb = super#module_binding mb in
-      match (mb.pmb_name, mb.pmb_expr.pmod_attributes) with
-      | { txt = Some _; _ }, [ { attr_name = { txt = "enum"; _ }; _ } ] -> (
-          match mb.pmb_expr.pmod_desc with
-          | Pmod_structure
-              ([ { pstr_desc = Pstr_type (name, variants); _ } ] as str) ->
-              let type_ = enum ~loc:mb.pmb_expr.pmod_loc (name, variants) () in
-              Ast_builder.Default.module_binding ~loc:mb.pmb_loc
-                ~name:{ txt = mb.pmb_name.txt; loc = mb.pmb_name.loc }
-                ~expr:
-                  (Ast_builder.Default.pmod_structure ~loc:mb.pmb_expr.pmod_loc
-                     (str @ type_))
-          | _ -> mb)
-      | _ -> mb
-  end
+      method! value_binding mb acc =
+        let loc = mb.pvb_loc in
+        match mb.pvb_pat.ppat_desc with
+        | Ppat_var { txt = name; _ } ->
+            if String.starts_with name ~prefix:"demo_" then acc
+            else
+              Driver.Lint_error.of_string loc
+                "Ops, variable name must not start with demo_"
+              :: acc
+        | _ -> acc
+    end
+end
 
-let _ = Driver.register_transformation "enum" ~impl:traverse#structure
+let _ =
+  Driver.register_transformation "enum2" ~lint_impl:(fun st ->
+      Lint.traverse#structure st [])
 
 module PreProcess = struct
   let traverse =
     object (_ : Ast_traverse.map)
       inherit Ast_traverse.map as super
 
-      method! module_binding mb =
-        let mb = super#module_binding mb in
-        match (mb.pmb_name, mb.pmb_expr.pmod_attributes) with
-        | ( { txt = Some _; _ },
-            [ { attr_name = { txt = "enum2"; _ }; attr_payload = payload; _ } ]
-          ) -> (
-            let opt =
-              match payload with PStr [%str opt] -> true | _ -> false
-            in
-            match mb.pmb_expr.pmod_desc with
+      method! module_expr mod_exp =
+        let mod_exp = super#module_expr mod_exp in
+        match mod_exp.pmod_attributes with
+        | [ { attr_name = { txt = "enum"; _ }; _ } ] -> (
+            match mod_exp.pmod_desc with
             | Pmod_structure
                 ([ { pstr_desc = Pstr_type (name, variants); _ } ] as str) ->
-                let type_ =
-                  enum ~loc:mb.pmb_expr.pmod_loc ~opt (name, variants) ()
-                in
-                Ast_builder.Default.module_binding ~loc:mb.pmb_loc
-                  ~name:{ txt = mb.pmb_name.txt; loc = mb.pmb_name.loc }
-                  ~expr:
-                    (Ast_builder.Default.pmod_structure
-                       ~loc:mb.pmb_expr.pmod_loc (str @ type_))
-            | _ -> mb)
-        | _ -> mb
-    end
-end
-
-module Lint = struct
-  let catch_all_pattern_found cases =
-    List.exists
-      (fun case ->
-        match case.pc_lhs.ppat_desc with Ppat_any -> true | _ -> false)
-      cases
-
-  let traverse =
-    object
-      inherit [Driver.Lint_error.t list] Ast_traverse.fold
-
-      method! module_binding mb acc =
-        let loc = mb.pmb_loc in
-        match
-          (mb.pmb_name, mb.pmb_expr.pmod_desc, mb.pmb_expr.pmod_attributes)
-        with
-        | ( _,
-            Pmod_structure [ { pstr_desc = Pstr_type (_, _); _ }; _ ],
-            [ { attr_name = { txt = "enum"; _ }; _ } ] ) ->
-            print_endline "Found enum";
-            Driver.Lint_error.of_string loc
-              "Ops, enum must be used on a simple module struct with only one \
-               type variant"
-            :: acc
-        | _ -> acc
+                let type_ = enum ~loc:mod_exp.pmod_loc (name, variants) () in
+                Ast_builder.Default.pmod_structure ~loc:mod_exp.pmod_loc
+                  (str @ type_)
+            | _ -> mod_exp)
+        | _ -> mod_exp
     end
 end
 
 let _ =
-  Driver.register_transformation "enum2"
-    ~lint_impl:(fun st -> Lint.traverse#structure st [])
-    ~impl:PreProcess.traverse#structure
+  Driver.register_transformation "enum" ~impl:PreProcess.traverse#structure
+
+module Global = struct
+  let traverse =
+    object (_ : Ast_traverse.map)
+      inherit Ast_traverse.map as super
+
+      method! module_expr mod_exp =
+        let mod_exp = super#module_expr mod_exp in
+        match mod_exp.pmod_attributes with
+        | [ { attr_name = { txt = "enum2"; _ }; attr_payload = payload; _ } ]
+          -> (
+            let opt =
+              match payload with PStr [%str opt] -> true | _ -> false
+            in
+            match mod_exp.pmod_desc with
+            | Pmod_structure
+                ([ { pstr_desc = Pstr_type (name, variants); _ } ] as str) ->
+                let type_ =
+                  enum ~loc:mod_exp.pmod_loc ~opt (name, variants) ()
+                in
+                Ast_builder.Default.pmod_structure ~loc:mod_exp.pmod_loc
+                  (str @ type_)
+            | _ -> mod_exp)
+        | _ -> mod_exp
+    end
+end
+
+let _ = Driver.register_transformation "enum2" ~impl:Global.traverse#structure
