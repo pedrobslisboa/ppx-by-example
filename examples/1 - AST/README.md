@@ -212,12 +212,12 @@ end
 }
 ```
 
-As you can see, `Bar.ml` and `GameEnum` are modules, and their content is a **structur** that contain a list of **structure items**.
+As you can see, `Bar.ml` and `GameEnum` are modules, and their content is a **structure** that contain a list of **structure items**.
 
 > **📝 Note**  
 > A structure item can either represent a top-level expression, a type definition, a `let` definition, etc.
 
-I'm not going to be able to cover all structure items, but you can find more about it in the [OCaml documentation](https://ocaml.org/learn/tutorials/modules.html). I strongly advise you to take a look at the [AST Explorer](https://astexplorer.net/) and play with it; it will help you a lot. Here it is a [sample](https://astexplorer.net/#/gist/79e2c7cf04e26236bce5627e6d59a020/caa55456cfa6c30c37cc3a701979cf837c213b71).
+I'm not going to be able to cover all structure items, but you can find more about it in the [OCaml documentation](https://ocaml.org/learn/tutorials/modules.html). I strongly advise you to take a look at the [AST Explorer](https://astexplorer.net/) and play with it; it will help you a lot. Here is a [sample](https://astexplorer.net/#/gist/79e2c7cf04e26236bce5627e6d59a020/caa55456cfa6c30c37cc3a701979cf837c213b71).
 
 ### Language Extensions and Attributes
 
