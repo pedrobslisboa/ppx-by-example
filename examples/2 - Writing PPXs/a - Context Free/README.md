@@ -261,16 +261,14 @@ let from_string = function
                   ptype_kind = Ptype_variant variants;
                   _;
                 };
-              ] )
-
- -> (* ... *)
+              ] ) -> (* ... *)
           | _ -> (* ... *)
     ```
 
   - **Create functions to generate the patterns:**  
     All we are going to do here is what we covered in [Building AST](../../1%20-%20AST/a%20-%20Building%20AST/README.md). So it shouldn't be a problem to understand this part.
 
-    - Creating the `to_string` function:
+    - **Creating the `to_string` function:**
 
       ```ocaml
       let function_name suffix = type_name ^ suffix in
