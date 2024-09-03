@@ -2,7 +2,7 @@
 
 ## Description
 
-After knowing what is a [AST](../1%20-%20AST/README.md), how to [build an AST](../1%20-%20AST/a%20-%20Building%20AST/README.md) and [destructure it](../1%20-%20AST/b%20-%20Destructing%20AST/README.md), we can now write our own PPX in OCaml.
+After knowing what is an [AST](../1%20-%20AST/README.md), how to [build an AST](../1%20-%20AST/a%20-%20Building%20AST/README.md) and [destructure it](../1%20-%20AST/b%20-%20Destructing%20AST/README.md), we can now write our own PPX in OCaml.
 
 ## Transformations
 
