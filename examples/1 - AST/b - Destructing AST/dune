@@ -1,5 +1,5 @@
 (executable
- (name destructing_ast)
+ (name destructuring_ast)
  (public_name destructing_ast_demo)
  (libraries ppxlib ppxlib.astlib)
  (preprocess
