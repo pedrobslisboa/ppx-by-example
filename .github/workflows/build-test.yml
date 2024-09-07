@@ -1,0 +1,39 @@
+name: Build and Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          # - windows-latest
+        ocaml-version:
+          - 5.1
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-version }}
+          dune-cache: true
+          opam-depext-flags: "--with-test"
+          allow-prerelease-opam: true
+
+      - run: opam install . --deps-only --with-test
+
+      - name: build project
+        run: opam exec -- dune build
+
+      - name: run test
+        run: opam exec -- dune runtest
