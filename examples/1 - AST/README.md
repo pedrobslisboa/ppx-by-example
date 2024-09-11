@@ -279,7 +279,8 @@ As the AST represents the structure of the source code in a tree-like format, it
   There are 2 forms of extension nodes:
 
   - **For “algebraic” categories**: `[%name "John Doe"]`
-  - **For structures and signatures**: `[%%name "John Doe"]` 
+  - **For structures and signatures**: `[%%name "John Doe"]`
+<br>
 
   > In the code `let name = [%name "John Doe"]`, `[%name "John Doe"]` is the extension node, where **name** is the extension name (`string Ast_414.Asttypes.loc`) and **"John Doe"** is the `payload`. For the entire item `let name = "John Doe"`, you must use `%%`: `[%%name "John Doe]`.
 
@@ -294,6 +295,7 @@ As the AST represents the structure of the source code in a tree-like format, it
   - **Attached to on “algebraic” categories**: `[@name]`
   - **Attached to “blocks”**: `[@@name]`
   - **Stand-alone of signatures or structures modules**: `[@@@name]`
+<br>
 
   > In the code `let name = "John Doe" [@print expr]`, `[@print expr]` is the attribute of the `"John Doe"` node, where **print** is the attribute name (`string Ast_414.Asttypes.loc`) and **expr** is the `payload`. To be an attribute of the entire item `let name = "John Doe"`, you must use `@@`: `[@@print]`. If it is an stand-alone attribute of a module, you must use `@@@`: `[@@@print]`.
 
