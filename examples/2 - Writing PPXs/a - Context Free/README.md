@@ -30,9 +30,12 @@ There are two main types of context-free transformations:
 - **[Derivers](#derivers)**: These append code after the item without changing the original item.
 
 ## Extenders
-<small>:page_facing_up: [Doc](https://ocaml-ppx.github.io/ppxlib/ppxlib/driver.html#def_extenders)</small>
+<small>:page_facing_up: [Doc](https://ocaml-ppx.github.io/ppxlib/ppxlib/driver.html#def_extenders)</small><br>
+<small>⬅️ Extenders work with extension nodes. If you have any doubts about attributes, please review the [AST Extension Node section](../../1%20-%20AST/README.md#ast_extension_node).</small>
 
-Extenders allow you to replace an extension node with new content. However, they do not have direct access to the surrounding code context, so they cannot change the surrounding code.
+Extenders allow you to replace an extension node with new content. However, they do not have direct access to the surrounding code context, so they cannot modify the surrounding code.
+
+If an extender is broken or missing, the code will not compile. Therefore, it is important to ensure that the extender is correctly implemented.
 
 An extension node is a node in the AST that represents an extension point. For example, in the code `let x = [%foo]`, `[%foo]` is an extension node.
 
@@ -169,9 +172,10 @@ let grin = [%emoji "grin"]
 ---
 
 ## Derivers
-<small>:page_facing_up: [Doc](https://ocaml-ppx.github.io/ppxlib/ppxlib/driver.html#def_derivers)</small>
+<small>:page_facing_up: [Doc](https://ocaml-ppx.github.io/ppxlib/ppxlib/driver.html#def_derivers)</small><br>
+<small>⬅️ A deriver is a custom attribute provided by PPXlib. If you have any doubts about attributes, please review the AST Attributes section.</small>
 
-Derivers are different from extenders in that they append new code after an existing item rather than replacing parts of it. The new code works in conjunction with the original item, or independently, depending on the transformation needed.
+Derivers differ from extenders in that they append new code after an existing item rather than replacing parts of it. The new code can work in conjunction with the original item or independently, depending on the transformation needed. They are specified using the [@@deriving] attribute.
 
 A simple and common example of a deriver is the `enum` deriver:
 
