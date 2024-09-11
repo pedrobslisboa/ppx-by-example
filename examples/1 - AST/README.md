@@ -40,6 +40,55 @@ OCaml's Parsetree can be confusing, verbose, and hard to understand, but it's a 
 
 You don't need to be an expert on it knowing all the tree possibilities, but you should know how to read it. For this, I'm going to use the [AST Explorer](https://astexplorer.net/) throughout the repository to help you understand the AST.
 
+A simple example of learning more about the OCaml compiler is that types are recursive by default, while values are non-recursive.
+With the AST, we can see this clearly:
+```ocaml
+type name = string
+let name = "John Doe"
+```
+```json5
+// AST Tree
+{
+  "type": "structure",
+  "structure": [
+    // type name = string
+    {
+      "type": "structure_item",
+      "pstr_desc": {
+        "type": "Pstr_type",
+        "rec_flag": {
+          "type": "Recursive"
+        },
+        "type_declarations": [
+          {
+            "type": "type_declaration",
+            "ptype_name": {/* ... */},
+          }
+        ]
+      },
+      "pstr_loc": {/* ... */},
+    },
+    // let name = "John Doe"
+    {
+      "type": "structure_item",
+      "pstr_desc": {
+        "type": "Pstr_value",
+        "rec_flag": {
+          "type": "Nonrecursive"
+        },
+        "value_bindings": [
+          {
+            "type": "value_binding",
+            "pvb_pat": {/* ... */},
+          }
+        ]
+      },
+      "pstr_loc": {/* ... */},
+    }
+  ]
+}
+```
+
 ### First Look
 
 By comparing code snippets with their AST representations, you'll better understand how OCaml interprets your code, which is essential for working with PPXs or delving into the compiler's internals. The [AST Explorer](https://astexplorer.net/) tool will help make these concepts clearer and more accessible.
