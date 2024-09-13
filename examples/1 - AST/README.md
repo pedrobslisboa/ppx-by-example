@@ -40,6 +40,55 @@ OCaml's Parsetree can be confusing, verbose, and hard to understand, but it's a 
 
 You don't need to be an expert on it knowing all the tree possibilities, but you should know how to read it. For this, I'm going to use the [AST Explorer](https://astexplorer.net/) throughout the repository to help you understand the AST.
 
+A simple example of learning more about the OCaml compiler is that types are recursive by default, while values are non-recursive.
+With the AST, we can see this clearly:
+```ocaml
+type name = string
+let name = "John Doe"
+```
+```json5
+// AST Tree
+{
+  "type": "structure",
+  "structure": [
+    // type name = string
+    {
+      "type": "structure_item",
+      "pstr_desc": {
+        "type": "Pstr_type",
+        "rec_flag": {
+          "type": "Recursive"
+        },
+        "type_declarations": [
+          {
+            "type": "type_declaration",
+            "ptype_name": {/* ... */},
+          }
+        ]
+      },
+      "pstr_loc": {/* ... */},
+    },
+    // let name = "John Doe"
+    {
+      "type": "structure_item",
+      "pstr_desc": {
+        "type": "Pstr_value",
+        "rec_flag": {
+          "type": "Nonrecursive"
+        },
+        "value_bindings": [
+          {
+            "type": "value_binding",
+            "pvb_pat": {/* ... */},
+          }
+        ]
+      },
+      "pstr_loc": {/* ... */},
+    }
+  ]
+}
+```
+
 ### First Look
 
 By comparing code snippets with their AST representations, you'll better understand how OCaml interprets your code, which is essential for working with PPXs or delving into the compiler's internals. The [AST Explorer](https://astexplorer.net/) tool will help make these concepts clearer and more accessible.
@@ -223,14 +272,34 @@ I'm not going to be able to cover all structure items, but you can find more abo
 
 As the AST represents the structure of the source code in a tree-like format, it also represents the Extension nodes and Attributes. It is mostly from the extension and attributes that the PPXs are built, so it's important to understand that they are part of the AST and have their own structure.
 
-- **Extension nodes** are generic placeholders in the syntax tree. They are rejected by the type-checker and are intended to be “expanded” by external tools such as -ppx rewriters. On AST, it is represented as `string Ast_414.Asttypes.loc * payload`.
+- <span name="ast_extension_node"><strong>Extension nodes</strong></span> are generic placeholders in the syntax tree. They are rejected by the type-checker and are intended to be “expanded” by external tools such as -ppx rewriters. On AST, it is represented as `string Ast_414.Asttypes.loc * payload`.
 
-  For example, in the code `let name = [%name "John Doe"]`, `[%name "John Doe"]` is the extension node, where **name** is the extension name (`string Ast_414.Asttypes.loc`) and **"John Doe"** is the `payload`.
+  So, as extension nodes are placeholders for a code to be added, adding a new extension node with no extender declared should break the compilation. For example, in the code `let name = [%name "John Doe"]`. See a demo [here](https://sketch.sh/s/6DxhTCXYpOkI0G8k9keD0d/)
 
-- **Attributes** are “decorations” of the syntax tree, which are mostly ignored by the type-checker but can be used by external tools. Decorators must be attached to a specific node in the syntax tree. (Check it breaking on this [AST sample](https://astexplorer.net/#/gist/c2f77c38bd5b855775e7ea6513230775/95bbbedaf54dd6daadb278b9d5ed7b28718331f2))
+  There are 2 forms of extension nodes:
 
-  For example, in the code `let name = "John Doe" [@print expr]`, `[@print expr]` is the attribute of the `"John Doe"` node, where **print** is the attribute name (`string Ast_414.Asttypes.loc`) and **expr** is the `payload`. To be an attribute of the entire item `let name = "John Doe"`, you must use `@@`: `[@@print]`.
+  - **For “algebraic” categories**: `[%name "John Doe"]`
+  - **For structures and signatures**: `[%%name "John Doe"]`
+<br>
 
+  > In the code `let name = [%name "John Doe"]`, `[%name "John Doe"]` is the extension node, where **name** is the extension name (`string Ast_414.Asttypes.loc`) and **"John Doe"** is the `payload`. For the entire item `let name = "John Doe"`, you must use `%%`: `[%%name "John Doe]`.
+
+  Don't worry much about creating a new extension node; we'll cover it in the [Wrinting PPXs section](../2%20-%20Writing%20PPXs/README.md).
+
+- <span name="ast_attributes"><strong>Attributes</strong></span> are “decorations” of the syntax tree, which are mostly ignored by the type-checker but can be used by external tools. Decorators must be attached to a specific node in the syntax tree. (Check it breaking on this [AST sample](https://astexplorer.net/#/gist/c2f77c38bd5b855775e7ea6513230775/95bbbedaf54dd6daadb278b9d5ed7b28718331f2))
+
+  As attributes are just “decorations”, you can add a new attribute without breaking the compilation. For example, in the code, `let name = "John Doe" [@print]`. See a demo [here](https://sketch.sh/s/6DxhTCXYpOkI0G8k9keD0d/)
+
+  There are 3 forms of attributes:
+
+  - **Attached to on “algebraic” categories**: `[@name]`
+  - **Attached to “blocks”**: `[@@name]`
+  - **Stand-alone of signatures or structures modules**: `[@@@name]`
+<br>
+
+  > In the code `let name = "John Doe" [@print expr]`, `[@print expr]` is the attribute of the `"John Doe"` node, where **print** is the attribute name (`string Ast_414.Asttypes.loc`) and **expr** is the `payload`. To be an attribute of the entire item `let name = "John Doe"`, you must use `@@`: `[@@print]`. If it is an stand-alone attribute of a module, you must use `@@@`: `[@@@print]`.
+
+  Don't worry much about creating a new attributes node; we'll cover it in the [Wrinting PPXs section](../2%20-%20Writing%20PPXs/README.md).
 <br>
 
 I know that it can be a lot, but don't worry; we are going step by step, and you are going to understand it.
