@@ -23,3 +23,5 @@ So as I said, I'm learning, and I'm not an expert on the subject. If you find an
 - [Ocaml Metaprogramming Docs](https://ocaml.org/docs/metaprogramming)
 - [PPXLib documentation](https://ocaml-ppx.github.io/ppxlib/ppxlib/index.html)
 - [The needed introduction to writing a ppx](https://www.youtube.com/live/dMoRMqQ6GLs?feature=shared&t=4251)
+- [An introduction to OCaml PPX ecosystem
+](https://tarides.com/blog/2019-05-09-an-introduction-to-ocaml-ppx-ecosystem/)
