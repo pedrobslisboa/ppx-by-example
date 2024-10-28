@@ -10,6 +10,7 @@ bug-reports: "https://github.com/pedrobslisboa/ppx-studies/issues"
 depends: [
   "dune" {>= "3.8"}
   "ocaml" {>= "5.0.0"}
+  "alcotest"
   "ocaml-lsp-server"
   "ocamlformat"
   "ppx_deriving"

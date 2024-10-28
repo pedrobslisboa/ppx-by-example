@@ -94,7 +94,7 @@ For even more simplicity, use `eint`:
 let two ~loc = Ast_builder.Default.eint ~loc 2
 ```
 
-> **:bulb: Tip**    
+> [!TIP]    
 > `eint` is an abbreviation for expression (`e`) integer (`int`).
 
 ## Using Metaquot for AST Construction
@@ -111,7 +111,7 @@ With Metaquot, you can construct an integer AST like this:
 let three ~loc = [%expr 3]
 ```
 
-> **:bulb: Tip**    
+> [!TIP]    
 > Metaquot is highly readable and intuitive but is static. For dynamic values, use Anti-Quotations.
 
 ### Using Anti-Quotations in Metaquot

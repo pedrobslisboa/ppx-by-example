@@ -1,8 +1,8 @@
-let demo_name = "Global Demo"
-let _ = demo_name
+let name = "Global Demo"
+let _ = name
 
 (* Uncomment the code bellow to see the lint error *)
-(* let name = "John Doe" *)
+(* let demo_name = "John Doe" *)
 
 (* module enum *)
 let _ = print_endline "\n# Enum"
@@ -42,10 +42,12 @@ let _ =
   | None -> Printf.printf "Stick is not a valid value\n"
 
 (* Uncomment the code bellow to see the error *)
-(* module GameEnumError = struct
-  type _t = Rock | Paper | Scissors
+(*
+   module GameEnumError = struct
+        type _t = Rock | Paper | Scissors
 
-  module GameEnum = struct
-    type t = Rock | Paper | Scissors
-  end [@enum]
-end [@enum] *)
+        module GameEnum = struct
+          type t = Rock | Paper | Scissors
+        end [@enum]
+      end [@enum]
+*)

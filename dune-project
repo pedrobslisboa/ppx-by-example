@@ -24,6 +24,7 @@
  (depends
   (ocaml
    (>= 5.0.0))
+  alcotest
   ocaml-lsp-server
   ocamlformat
   ppx_deriving

@@ -2,4 +2,4 @@
  (name global_demo)
  (public_name global_demo)
  (preprocess
-  (pps global)))
+  (pps global_context)))
