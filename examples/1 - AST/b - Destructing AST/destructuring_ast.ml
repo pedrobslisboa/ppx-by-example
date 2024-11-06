@@ -15,11 +15,11 @@ let match_int_payload ~loc payload =
         {
           pstr_desc =
             Pstr_eval
-              ({ pexp_desc = Pexp_constant (Pconst_integer ("1", None)); _ }, _);
+              ({ pexp_desc = Pexp_constant (Pconst_integer (value, None)); _ }, _);
           _;
         };
       ] -> (
-      try Ok ("1" |> int_of_string)
+      try Ok (value |> int_of_string)
       with Failure _ ->
         Error (Location.Error.createf ~loc "Value is not a valid integer"))
   | _ -> Error (Location.Error.createf ~loc "Wrong pattern")
