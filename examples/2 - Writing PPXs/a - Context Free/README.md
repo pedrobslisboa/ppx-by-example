@@ -1,6 +1,6 @@
 # Context-Free Transformations
 
-This section has code examples to help you understand it better.  
+This section has code examples to help you understand it better.
 To run the examples:
 
 ```sh
@@ -67,14 +67,14 @@ Here, `[%one]` is replaced with the integer value `1`. This is a basic example o
   let extender_name = "one"
   ```
 
-- **Define the extender extractor:**  
+- **Define the extender extractor:**
   Since there is no payload (additional data), we define the extractor as:
 
   ```ocaml
   let extender_extracter = Ast_pattern.(pstr nil)
   ```
 
-- **Create the new AST:**  
+- **Create the new AST:**
   We define the expression that will replace `[%one]`:
 
   ```ocaml
@@ -100,7 +100,7 @@ Here, `[%one]` is replaced with the integer value `1`. This is a basic example o
     Extension.V3.declare extender_name Extension.Context.expression
       extender_extracter
       expand
-  
+
   (* Register the extender *)
   let rule = Ppxlib.Context_free.Rule.extension extension
   let () = Driver.register_transformation ~rules:[ rule ] extender_name
@@ -118,7 +118,7 @@ let grin = [%emoji "grin"]
 
 #### Steps to Implement This Extender:
 
-- **Declare the extension name and extractor:**  
+- **Declare the extension name and extractor:**
   Here, the payload is a string (the alias of the emoji):
 
   ```ocaml
@@ -201,8 +201,8 @@ It can be attached to various types of structures and signatures. For instance, 
 
 The full list of arguments for `Deriving.add` can be found in the [documentation](https://ocaml-ppx.github.io/ppxlib/ppxlib/Ppxlib/Deriving/index.html#val-add).
 
-### Example 1: Enum Deriver 
-[:link: Sample Code](./context_free.ml#L51-L124)
+### Example 1: Enum Deriver
+[:link: Sample Code](./context_free.ml#L51-L125)
 
 The following example is more complex. Take your time; it’s explained step by step.
 
@@ -230,14 +230,14 @@ let from_string = function
   let deriver_name = "enum"
   ```
 
-- **Define the arguments for the deriver:**  
+- **Define the arguments for the deriver:**
   For this example, we don't have any arguments:
 
   ```ocaml
   let args () = Deriving.Args.(empty)
   ```
 
-- **Build the new AST:**  
+- **Build the new AST:**
   We'll match the AST we want to transform and generate the `to_string` and `from_string` functions.
 
   - **Match the type declaration with pattern matching:**
@@ -269,7 +269,7 @@ let from_string = function
           | _ -> (* ... *)
     ```
 
-  - **Create functions to generate the patterns:**  
+  - **Create functions to generate the patterns:**
     All we are going to do here is what we covered in [Building AST](../../1%20-%20AST/a%20-%20Building%20AST/README.md). So it shouldn't be a problem to understand this part.
 
     - **Creating the `to_string` function:**
@@ -411,7 +411,7 @@ let from_string = function
   let _ = Deriving.add deriver_name ~str_type_decl:(generator ())
   ```
 
-### Example 2: Enum Deriver with args 
+### Example 2: Enum Deriver with args
 [:link: Sample Code](./context_free.ml#L126-L216)
 
 Let's say we want to add `to_string` and `from_string` functions to a variant type, but we want to have it with options instead of raise:
@@ -441,7 +441,7 @@ This is the same as the previous example, but we need to add a new argument to t
   let args () = Deriving.Args.(empty +> arg "opt" bool)
   ```
 
-- **Build the new AST:**  
+- **Build the new AST:**
   There will no much difference on the enum code, we just need to check if the `opt` argument is `true` and add the `option` return to the `from_string` function and change the else to `None`:
 
   ```ocaml

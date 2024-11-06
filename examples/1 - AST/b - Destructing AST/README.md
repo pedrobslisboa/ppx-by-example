@@ -2,7 +2,7 @@
 
 <small>:link: [Docs](https://ocaml-ppx.github.io/ppxlib/ppxlib/matching-code.html)</small>
 
-This section has code examples to help you understand it better.  
+This section has code examples to help you understand it better.
 To run the examples:
 
 ```sh
@@ -38,7 +38,7 @@ into:
 let one = 1
 ```
 
-You’ll need to destructure the AST representing the extension point (`[%one]`) to replace it with `1`.  
+You’ll need to destructure the AST representing the extension point (`[%one]`) to replace it with `1`.
 There are several ways to destructure an AST. We’ll explore three methods:
 
 - **AST Structure Pattern Matching**
@@ -46,7 +46,7 @@ There are several ways to destructure an AST. We’ll explore three methods:
 - **Using Metaquot**
 
 ## AST Structure Pattern Matching
- 
+
 The most fundamental method for destructuring an AST in PPXLib is by directly matching on the AST’s structure.
 
 ### Example: Matching Integer Payload Manually

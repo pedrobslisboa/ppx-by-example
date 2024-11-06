@@ -1,6 +1,6 @@
 # Global Transformations
 
-This section contains code examples to help you understand how to implement global transformations in OCaml using PPXLib.  
+This section contains code examples to help you understand how to implement global transformations in OCaml using PPXLib.
 To run the examples:
 
 ```sh

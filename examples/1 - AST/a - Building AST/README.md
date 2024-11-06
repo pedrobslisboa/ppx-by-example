@@ -68,7 +68,6 @@ While this method provides full control over the AST, it is verbose and less mai
 
 ## Building ASTs with `AST_builder`
 
-  
 PPXLib provides the `AST_builder` module, which simplifies the process of building ASTs by providing helper functions.
 
 ### Example 1: Using `pexp_constant` for Integer AST
@@ -94,7 +93,7 @@ For even more simplicity, use `eint`:
 let two ~loc = Ast_builder.Default.eint ~loc 2
 ```
 
-> **:bulb: Tip**    
+> **:bulb: Tip**
 > `eint` is an abbreviation for expression (`e`) integer (`int`).
 
 ## Using Metaquot for AST Construction
@@ -116,7 +115,6 @@ let three ~loc = [%expr 3]
 
 ### Using Anti-Quotations in Metaquot
 
-  
 Anti-Quotations allow you to insert dynamic expressions into your Metaquot ASTs.
 
 #### Example: Inserting Dynamic Expressions with Anti-Quotations
@@ -140,7 +138,6 @@ let _ =
 
 ## Building Complex Expressions
 
-  
 Beyond simple expressions, you may need to build more complex ASTs, such as `let` expressions.
 
 ### Example 1: Constructing a Let Expression with `AST_builder`
@@ -183,7 +180,7 @@ let let_expression =
 This approach is shorter and easier to understand.
 
 ## Conclusion
- 
+
 In this section, we explored three methods for building ASTs:
 
 - **Pure OCaml**: The most basic but verbose approach.
