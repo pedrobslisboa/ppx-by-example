@@ -94,7 +94,7 @@ To make AST destructuring more readable, PPXLib provides the `Ast_pattern` modul
 
 ### Example 1: Matching Integer Payload with `Ast_pattern`
 
-[:link: Sample Code](./destructuring_ast.ml#L29-L38)
+[:link: Sample Code](./destructuring_ast.ml#L37-L40)
 
 Let’s destructure the same integer `1` AST using `Ast_pattern`:
 
@@ -146,7 +146,7 @@ let match_int_payload expr =
 
 ### Example 2: Matching Complex Expressions with Metaquot and Anti-Quotations
 
-[:link: Sample Code](./destructuring_ast.ml#L62-L80)
+[:link: Sample Code](./destructuring_ast.ml#L79-L90)
 
 For example, to match any expression of the form `1 + <int>`:
 
