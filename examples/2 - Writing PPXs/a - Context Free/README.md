@@ -243,7 +243,7 @@ let from_string = function
   - **Match the type declaration with pattern matching:**
 
     ```ocaml
-    let enum2 ~ctxt ast =
+    let enum ~ctxt ast =
        let loc = Expansion_context.Deriver.derived_item_loc ctxt in
        match ast with
        | ( _,
@@ -253,20 +253,7 @@ let from_string = function
                ptype_kind = Ptype_variant variants;
                _;
              };
-           ] ) ->
-          (* the structure_item we are looking for is a PStr_type *)
-          match structure_item with
-          | (
-             (* Doesn't matter the rec_flag for us *)
-              _,
-              [
-                {
-                  ptype_name = { txt = type_name; _ };
-                  ptype_kind = Ptype_variant variants;
-                  _;
-                };
-              ] ) -> (* ... *)
-          | _ -> (* ... *)
+           ] ) -> (*...*)
     ```
 
   - **Create functions to generate the patterns:**
