@@ -284,7 +284,7 @@ As the AST represents the structure of the source code in a tree-like format, it
 
   > In the code `let name = [%name "John Doe"]`, `[%name "John Doe"]` is the extension node, where **name** is the extension name (`string Ast_414.Asttypes.loc`) and **"John Doe"** is the `payload`. For the entire item `let name = "John Doe"`, you must use `%%`: `[%%name "John Doe]`.
 
-  Don't worry much about creating a new extension node; we'll cover it in the [Wrinting PPXs section](../2%20-%20Writing%20PPXs/README.md).
+  Don't worry much about creating a new extension node; we'll cover it in the [Writing PPXs section](../2%20-%20Writing%20PPXs/README.md).
 
 - <span name="ast_attributes"><strong>Attributes</strong></span> are “decorations” of the syntax tree, which are mostly ignored by the type-checker but can be used by external tools. Decorators must be attached to a specific node in the syntax tree. (Check it breaking on this [AST sample](https://astexplorer.net/#/gist/c2f77c38bd5b855775e7ea6513230775/95bbbedaf54dd6daadb278b9d5ed7b28718331f2))
 
@@ -299,7 +299,7 @@ As the AST represents the structure of the source code in a tree-like format, it
 
   > In the code `let name = "John Doe" [@print expr]`, `[@print expr]` is the attribute of the `"John Doe"` node, where **print** is the attribute name (`string Ast_414.Asttypes.loc`) and **expr** is the `payload`. To be an attribute of the entire item `let name = "John Doe"`, you must use `@@`: `[@@print]`. If it is an stand-alone attribute of a module, you must use `@@@`: `[@@@print]`.
 
-  Don't worry much about creating a new attributes node; we'll cover it in the [Wrinting PPXs section](../2%20-%20Writing%20PPXs/README.md).
+  Don't worry much about creating a new attributes node; we'll cover it in the [Writing PPXs section](../2%20-%20Writing%20PPXs/README.md).
 <br>
 
 I know that it can be a lot, but don't worry; we are going step by step, and you are going to understand it.

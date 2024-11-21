@@ -2,7 +2,7 @@
 
 <small>:link: [Docs](https://ocaml-ppx.github.io/ppxlib/ppxlib/matching-code.html)</small>
 
-This section has code examples to help you understand it better.  
+This section has code examples to help you understand it better.
 To run the examples:
 
 ```sh
@@ -38,7 +38,7 @@ into:
 let one = 1
 ```
 
-You’ll need to destructure the AST representing the extension point (`[%one]`) to replace it with `1`.  
+You’ll need to destructure the AST representing the extension point (`[%one]`) to replace it with `1`.
 There are several ways to destructure an AST. We’ll explore three methods:
 
 - **AST Structure Pattern Matching**
@@ -46,7 +46,7 @@ There are several ways to destructure an AST. We’ll explore three methods:
 - **Using Metaquot**
 
 ## AST Structure Pattern Matching
- 
+
 The most fundamental method for destructuring an AST in PPXLib is by directly matching on the AST’s structure.
 
 ### Example: Matching Integer Payload Manually
@@ -63,13 +63,13 @@ let match_int_payload ~loc payload =
         {
           pstr_desc =
             Pstr_eval
-              ({
-                 pexp_desc = Pexp_constant (Pconst_integer (value, None));
-                 _;
-               }, _);
+              ({ pexp_desc = Pexp_constant (Pconst_integer (value, None)); _ }, _);
           _;
         };
-      ] -> (try Ok (value |> int_of_string) with Failure _ -> Error (Location.Error.createf ~loc "Value is not a valid integer"))
+      ] -> (
+      try Ok (value |> int_of_string)
+      with Failure _ ->
+        Error (Location.Error.createf ~loc "Value is not a valid integer"))
   | _ -> Error (Location.Error.createf ~loc "Wrong pattern")
 ```
 
@@ -94,7 +94,7 @@ To make AST destructuring more readable, PPXLib provides the `Ast_pattern` modul
 
 ### Example 1: Matching Integer Payload with `Ast_pattern`
 
-[:link: Sample Code](./destructuring_ast.ml#L29-L38)
+[:link: Sample Code](./destructuring_ast.ml#L37-L40)
 
 Let’s destructure the same integer `1` AST using `Ast_pattern`:
 
@@ -146,7 +146,7 @@ let match_int_payload expr =
 
 ### Example 2: Matching Complex Expressions with Metaquot and Anti-Quotations
 
-[:link: Sample Code](./destructuring_ast.ml#L62-L80)
+[:link: Sample Code](./destructuring_ast.ml#L79-L90)
 
 For example, to match any expression of the form `1 + <int>`:
 
