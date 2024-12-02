@@ -72,11 +72,11 @@ module Lint = struct
         let loc = mb.pvb_loc in
         match mb.pvb_pat.ppat_desc with
         | Ppat_var { txt = name; _ } ->
-            if String.starts_with name ~prefix:"demo_" then acc
-            else
+            if String.ends_with name ~suffix:"demo_" then
               Driver.Lint_error.of_string loc
                 "Ops, variable name must not start with demo_"
               :: acc
+            else acc
         | _ -> acc
     end
 end

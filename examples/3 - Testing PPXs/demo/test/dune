@@ -1,0 +1,12 @@
+(cram
+ (deps %{bin:ocamlformat} standalone.exe))
+
+(executable
+ (name standalone)
+ (libraries ppxlib context_free global_context))
+
+(test
+ (name test)
+ (libraries alcotest)
+ (preprocess
+  (pps context_free global_context)))

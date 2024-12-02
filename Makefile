@@ -39,7 +39,6 @@ create-switch: ## Create opam switch
 install:
 	$(DUNE) build @install
 	opam install . --deps-only --with-test
-	cd demo && yarn install
 
 .PHONY: init
 init: create-switch install

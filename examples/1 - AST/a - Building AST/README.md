@@ -11,20 +11,23 @@ make demo-building_ast
 
 ### Table of Contents
 
-- [Description](#description)
-- [Building ASTs with Pure OCaml](#building-asts-with-pure-ocaml)
-  - [Example: Building a Simple Integer AST Manually](#example-building-a-simple-integer-ast-manually)
-- [Building ASTs with `AST_builder`](#building-asts-with-ast_builder)
-  - [Example 1: Using `pexp_constant` for Integer AST](#example-1-using-pexp_constant-for-integer-ast)
-  - [Example 2: Using `eint` for Simplified Integer AST](#example-2-using-eint-for-simplified-integer-ast)
-- [Using Metaquot for AST Construction](#using-metaquot-for-ast-construction)
-  - [Example: Building an Integer AST with Metaquot](#example-building-an-integer-ast-with-metaquot)
-  - [Using Anti-Quotations in Metaquot](#using-anti-quotations-in-metaquot)
-    - [Example: Inserting Dynamic Expressions with Anti-Quotations](#example-inserting-dynamic-expressions-with-anti-quotations)
-- [Building Complex Expressions](#building-complex-expressions)
-  - [Example 1: Constructing a Let Expression with `AST_builder`](#example-1-constructing-a-let-expression-with-ast_builder)
-  - [Example 2: Constructing a Let Expression with Metaquot](#example-2-constructing-a-let-expression-with-metaquot)
-- [Conclusion](#conclusion)
+- [Building AST](#building-ast)
+    - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Building ASTs with Low-Level Builders](#building-asts-with-low-level-builders)
+    - [Example: Building a Simple Integer AST Manually](#example-building-a-simple-integer-ast-manually)
+  - [Building ASTs with `AST_builder`](#building-asts-with-ast_builder)
+    - [Example 1: Using `pexp_constant` for Integer AST](#example-1-using-pexp_constant-for-integer-ast)
+    - [Example 2: Using `eint` for Simplified Integer AST](#example-2-using-eint-for-simplified-integer-ast)
+  - [Using Metaquot for AST Construction](#using-metaquot-for-ast-construction)
+    - [Example: Building an Integer AST with Metaquot](#example-building-an-integer-ast-with-metaquot)
+    - [Using Anti-Quotations in Metaquot](#using-anti-quotations-in-metaquot)
+      - [Example: Inserting Dynamic Expressions with Anti-Quotations](#example-inserting-dynamic-expressions-with-anti-quotations)
+  - [Building Complex Expressions](#building-complex-expressions)
+    - [Example 1: Constructing a Let Expression with `AST_builder`](#example-1-constructing-a-let-expression-with-ast_builder)
+    - [Example 2: Constructing a Let Expression with Metaquot](#example-2-constructing-a-let-expression-with-metaquot)
+  - [Conclusion](#conclusion)
+    - [On the next section, we will learn how to destructure an AST.](#on-the-next-section-we-will-learn-how-to-destructure-an-ast)
 
 ## Description
 
@@ -93,7 +96,7 @@ For even more simplicity, use `eint`:
 let two ~loc = Ast_builder.Default.eint ~loc 2
 ```
 
-> **:bulb: Tip**
+> [!TIP]    
 > `eint` is an abbreviation for expression (`e`) integer (`int`).
 
 ## Using Metaquot for AST Construction
@@ -110,7 +113,7 @@ With Metaquot, you can construct an integer AST like this:
 let three ~loc = [%expr 3]
 ```
 
-> **:bulb: Tip**    
+> [!TIP]    
 > Metaquot is highly readable and intuitive but is static. For dynamic values, use Anti-Quotations.
 
 ### Using Anti-Quotations in Metaquot
