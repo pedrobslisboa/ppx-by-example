@@ -8,6 +8,13 @@ On my ppx learning journey, I'm having some difficulties to find examples and ex
 
 So as I said, I'm learning, and I'm not an expert on the subject. If you find any mistake or have any suggestion, please open an issue or a pull request. I'll be glad to receive your feedback.
 
+## Requirements
+
+This repository assumes that you have the following tools installed on your machine:
+
+- OPAM: To manage OCaml dependencies and versions.
+- Make: To use the Makefile commands for building, cleaning, and running the project.
+
 ## Content
 
 - [AST](./examples/1%20-%20AST/README.md)
